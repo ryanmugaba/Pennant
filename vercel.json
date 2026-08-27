@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/pennant-ops", "destination": "/pennant-ops.html" }
+  ]
+}
