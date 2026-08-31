@@ -10,7 +10,6 @@
     "dev": "vercel dev"
   },
   "dependencies": {
-    "@vercel/postgres": "^0.10.0",
-    "cookie": "^2.0.1"
+    "@vercel/postgres": "^0.10.0"
   }
 }
