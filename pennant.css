@@ -450,3 +450,74 @@ p{margin:0}
   *{animation:none!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
   .up{opacity:1;transform:none}
 }
+
+/* ==========================================================================
+   Nov 2026 redesign: the staff console now uses the storefront's five
+   colours (ink, parchment, stone, lapis, gilt) and its rounded, heavy look.
+   These overrides sit last so they win over everything above.
+   ========================================================================== */
+:root{
+  --ink:#121212; --ink-2:#5f5b54; --ink-3:#8B867C;
+  --bg:#F3EFE7; --bg-2:color-mix(in srgb,#121212 4%,#F3EFE7); --surface:#F3EFE7;
+  --line:color-mix(in srgb,#121212 12%,transparent);
+  --blue:#1D4384; --blue-hover:color-mix(in srgb,#1D4384 85%,#121212);
+  --red:#B08D57; --green:#1D4384;
+  --tint:color-mix(in srgb,#121212 6%,transparent); --tint-2:color-mix(in srgb,#121212 11%,transparent);
+  --focus-ring:color-mix(in srgb,#1D4384 16%,transparent); --focus-outline:#1D4384;
+  --img-bg:color-mix(in srgb,#8B867C 25%,#F3EFE7);
+  --toast-bg:#121212; --toast-ink:#F3EFE7;
+  --radius:30px;
+  --font:'Inter',-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;
+}
+:root[data-theme="dark"]{
+  --ink:#F3EFE7; --ink-2:#a9a49a; --ink-3:#8B867C;
+  --bg:#121212; --bg-2:color-mix(in srgb,#F3EFE7 5%,#121212); --surface:#121212;
+  --line:color-mix(in srgb,#F3EFE7 13%,transparent);
+  --blue:#B08D57; --blue-hover:color-mix(in srgb,#B08D57 85%,#F3EFE7);
+  --red:#B08D57; --green:#B08D57;
+  --tint:color-mix(in srgb,#F3EFE7 8%,transparent); --tint-2:color-mix(in srgb,#F3EFE7 14%,transparent);
+  --focus-ring:color-mix(in srgb,#B08D57 22%,transparent); --focus-outline:#B08D57;
+  --img-bg:color-mix(in srgb,#F3EFE7 10%,#121212);
+  --toast-bg:#F3EFE7; --toast-ink:#121212;
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ink:#F3EFE7; --ink-2:#a9a49a; --ink-3:#8B867C;
+    --bg:#121212; --bg-2:color-mix(in srgb,#F3EFE7 5%,#121212); --surface:#121212;
+    --line:color-mix(in srgb,#F3EFE7 13%,transparent);
+    --blue:#B08D57; --blue-hover:color-mix(in srgb,#B08D57 85%,#F3EFE7);
+    --red:#B08D57; --green:#B08D57;
+    --tint:color-mix(in srgb,#F3EFE7 8%,transparent); --tint-2:color-mix(in srgb,#F3EFE7 14%,transparent);
+    --focus-ring:color-mix(in srgb,#B08D57 22%,transparent); --focus-outline:#B08D57;
+    --img-bg:color-mix(in srgb,#F3EFE7 10%,#121212);
+    --toast-bg:#F3EFE7; --toast-ink:#121212;
+  }
+}
+h1,h2,h3{font-weight:800;letter-spacing:-.035em}
+.btn{font-weight:600;padding:13px 26px}
+.btn-blue{color:#F3EFE7}
+:root[data-theme="dark"] .btn-blue{color:#121212}
+@media(prefers-color-scheme:dark){ :root:not([data-theme="light"]) .btn-blue{color:#121212} }
+.btn-sm{padding:9px 18px}
+.field input,.field textarea,.field select{border-radius:16px;padding:14px 16px}
+.list{border-radius:var(--radius)}
+.list-row img{border-radius:14px}
+.dropzone{border-radius:20px}
+.ops-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:26px 0 0}
+.ops-brand{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:20px;letter-spacing:-.04em}
+.ops-brand svg{width:22px;height:22px;fill:none;stroke:var(--ink);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ops-brand .fill{fill:#B08D57;stroke:#B08D57}
+.ops-brand small{font-size:14px;font-weight:600;color:var(--ink-3);letter-spacing:0;margin-left:4px}
+.ops-title{font-size:clamp(40px,6vw,72px);margin:34px 0 26px}
+.status{appearance:none;border:0;border-radius:999px;padding:8px 30px 8px 14px;font:inherit;font-size:13px;font-weight:700;
+  color:var(--ink);background:var(--tint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238B867C' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M7 10l5 5 5-5'/%3E%3C/svg%3E") no-repeat right 9px center/14px;cursor:pointer}
+.order-row{align-items:flex-start}
+.order-row .meta .sub + .sub{margin-top:3px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:26px}
+.stat{background:var(--bg-2);border-radius:var(--radius);padding:22px 24px}
+.stat b{display:block;font-size:30px;font-weight:800;letter-spacing:-.03em}
+.stat span{font-size:13px;font-weight:600;color:var(--ink-2)}
+@media(max-width:700px){ .stats{grid-template-columns:1fr} }
+[hidden]{display:none !important}
+.toast{opacity:0;transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .3s}
+.toast.up{opacity:1}
