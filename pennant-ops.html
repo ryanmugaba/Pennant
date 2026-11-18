@@ -238,6 +238,8 @@ async function renderOrders(){
         <div class="meta">
           <h4>Order #${o.id}</h4>
           <div class="sub">${esc(new Date(o.created_at).toLocaleString())} &middot; ${o.items.length} item${o.items.length === 1 ? '' : 's'} &middot; ${money(o.total)}</div>
+          ${o.customer && o.customer.name ? `<div class="sub">${esc(o.customer.name)} &middot; ${esc(o.customer.phone || '')} &middot; ${esc(o.customer.method || '')}${o.customer.address ? ' &middot; ' + esc([o.customer.address, o.customer.suburb, o.customer.city].filter(Boolean).join(', ')) : ''}</div>` : ''}
+          <div class="sub">${o.items.map(i => esc(i.qty + ' x ' + i.name)).join(', ')}</div>
         </div>
       </div>
     `).join('');

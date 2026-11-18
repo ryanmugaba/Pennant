@@ -121,6 +121,25 @@ If you would rather serve them as files, drop the folder next to `index.html` an
 
 ## Design notes, so edits stay consistent
 
+The storefront (`index.html`) was rebuilt in Nov 2026. Its rules:
+
+- Five colours only: ink `#121212`, parchment `#F3EFE7`, stone `#8B867C`, lapis `#1D4384` (the brand blue), gilt `#B08D57`. Tints are mixes of those five, never a new hue. Light mode accents in lapis, dark mode in gilt.
+- Type is Inter 800 for headings, 500 to 700 for text. Cormorant Garamond italic is used only for the Roman numerals and the Latin maxim.
+- Nothing square: cards 36px radius, fields 16px, buttons are pills.
+- No em dashes in copy.
+- The hero is a Three.js armillary sphere (`js/scene.js`) driven by scroll. GSAP ScrollTrigger and Lenis (in `vendor/`, no CDN) handle the scrollytelling; `js/app.js` sets `window.PENNANT_STORY.p` from 0 to 1 and the scene reads it. Reduced motion turns the movement off.
+- Storefront styles live in `store.css`. `pennant.css` is now only used by the staff console.
+
+## Customer accounts and notifications
+
+- `api/account.js` handles sign up, sign in, sign out, the current user and their orders (`?action=me|orders|signup|login|logout|google`). Passwords are hashed with scrypt; the session is a signed `pennant_user` cookie using the same `SESSION_SECRET`.
+- Google sign in appears only when `GOOGLE_CLIENT_ID` is set in Vercel (create an OAuth Web client in Google Cloud and add your domain to its authorised JavaScript origins).
+- Checkout sends name, phone, delivery and payment choice with the order; the staff console shows them. Signed in orders are linked to the account.
+- Notifications are an in-page inbox plus optional device alerts (browser Notification API through `sw.js`). They fire for order placed and account created. True push from the server would need VAPID keys and a push service; not set up.
+
+## Earlier design notes (staff console)
+
+
 - Type is Inter, weights 400 to 600 only. Headings 600, never 700.
 - Colours: text `#1d1d1f`, secondary `#6e6e73`, section tint `#f5f5f7`, one accent blue `#1d4384`, sampled off the wordmark. Nothing else.
 - Buttons are pills, `border-radius:980px`, three variants: blue, quiet grey, outline.
