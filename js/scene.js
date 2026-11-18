@@ -22,8 +22,10 @@ try {
 if (renderer) build();
 
 function build() {
-  const DPR = Math.min(window.devicePixelRatio || 1, 2);
-  renderer.setPixelRatio(DPR);
+  // start modest; frame() raises or lowers resolution based on how the machine copes
+  const MAX_DPR = Math.min(window.devicePixelRatio || 1, 1.75);
+  let dpr = Math.min(MAX_DPR, 1.25);
+  renderer.setPixelRatio(dpr);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -47,7 +49,7 @@ function build() {
   });
   const lapis = new THREE.MeshPhysicalMaterial({
     color: 0x1d4384, metalness: 0.05, roughness: 0.32,
-    clearcoat: 1, clearcoatRoughness: 0.06, sheen: 0.3, sheenColor: new THREE.Color(0x8b867c)
+    clearcoat: 1, clearcoatRoughness: 0.06
   });
   const ink = new THREE.MeshPhysicalMaterial({
     color: 0x121212, metalness: 0.2, roughness: 0.42, clearcoat: 0.8, clearcoatRoughness: 0.2
@@ -70,32 +72,32 @@ function build() {
     [0.6, 0.26], [0.42, 0.34], [0.36, 0.42], [0.34, 0.62], [0.4, 0.68], [0.44, 0.72],
     [0.3, 0.78], [0.14, 0.82], [0.0, 0.82]
   ].map(([x, y]) => new THREE.Vector2(x, y));
-  const plinth = new THREE.Mesh(new THREE.LatheGeometry(profile, 128), marble);
+  const plinth = new THREE.Mesh(new THREE.LatheGeometry(profile, 72), marble);
   plinth.position.y = -R - 1.02;
   plinth.castShadow = plinth.receiveShadow = true;
   root.add(plinth);
 
   // gilt band on the plinth
-  const band = new THREE.Mesh(new THREE.TorusGeometry(0.445, 0.022, 24, 128), gilt);
+  const band = new THREE.Mesh(new THREE.TorusGeometry(0.445, 0.022, 12, 72), gilt);
   band.rotation.x = Math.PI / 2;
   band.position.y = plinth.position.y + 0.72;
   root.add(band);
 
   // stem up to the cradle
-  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.07, 0.36, 48), gilt);
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.07, 0.36, 32), gilt);
   stem.position.y = -R - 0.06;
   stem.castShadow = true;
   root.add(stem);
 
   // cradle: a half ring under the meridian
-  const cradle = new THREE.Mesh(new THREE.TorusGeometry(R + 0.09, 0.03, 24, 160, Math.PI), giltDark);
+  const cradle = new THREE.Mesh(new THREE.TorusGeometry(R + 0.09, 0.03, 12, 80, Math.PI), giltDark);
   cradle.rotation.z = Math.PI;
   cradle.rotation.y = Math.PI / 2;
   cradle.castShadow = true;
   root.add(cradle);
 
   // horizon ring: wide and flat, fixed to the stand
-  const horizon = new THREE.Mesh(new THREE.TorusGeometry(R + 0.2, 0.06, 32, 200), gilt);
+  const horizon = new THREE.Mesh(new THREE.TorusGeometry(R + 0.2, 0.06, 16, 128), gilt);
   horizon.rotation.x = Math.PI / 2;
   horizon.scale.set(1, 1, 0.35);
   horizon.castShadow = true;
@@ -105,7 +107,7 @@ function build() {
   const armature = new THREE.Group();
   root.add(armature);
 
-  const meridian = new THREE.Mesh(new THREE.TorusGeometry(R, 0.042, 32, 220), gilt);
+  const meridian = new THREE.Mesh(new THREE.TorusGeometry(R, 0.042, 16, 140), gilt);
   meridian.castShadow = true;
   armature.add(meridian);
 
@@ -133,7 +135,7 @@ function build() {
   const axis = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, R * 2 + 0.34, 24), gilt);
   axisGroup.add(axis);
   for (const s of [1, -1]) {
-    const fin = new THREE.Mesh(new THREE.SphereGeometry(0.06, 48, 32), gilt);
+    const fin = new THREE.Mesh(new THREE.SphereGeometry(0.06, 24, 16), gilt);
     fin.position.y = s * (R + 0.17);
     axisGroup.add(fin);
   }
@@ -145,7 +147,7 @@ function build() {
   const parts = []; // { mesh, dir, spin }
 
   function ring(radius, tube, mat, setup, dir, spin) {
-    const m = new THREE.Mesh(new THREE.TorusGeometry(radius, tube, 28, 200), mat);
+    const m = new THREE.Mesh(new THREE.TorusGeometry(radius, tube, 14, 120), mat);
     setup(m);
     m.castShadow = true;
     m.userData.base = { pos: m.position.clone(), rot: m.rotation.clone() };
@@ -173,10 +175,10 @@ function build() {
   ecl.scale.set(1, 1, 0.32);
 
   // the earth: lapis enamel with a gilt equator line
-  const earth = new THREE.Mesh(new THREE.SphereGeometry(0.34, 96, 64), lapis);
+  const earth = new THREE.Mesh(new THREE.SphereGeometry(0.34, 64, 40), lapis);
   earth.castShadow = true;
   cage.add(earth);
-  const earthBand = new THREE.Mesh(new THREE.TorusGeometry(0.342, 0.008, 16, 128), gilt);
+  const earthBand = new THREE.Mesh(new THREE.TorusGeometry(0.342, 0.008, 8, 96), gilt);
   earthBand.rotation.x = Math.PI / 2;
   earth.add(earthBand);
 
@@ -185,7 +187,7 @@ function build() {
   const key = new THREE.DirectionalLight(0xfff4e2, 2.4);
   key.position.set(1.5, 9, 3);
   key.castShadow = true;
-  key.shadow.mapSize.set(2048, 2048);
+  key.shadow.mapSize.set(1024, 1024);
   key.shadow.camera.left = -4; key.shadow.camera.right = 4;
   key.shadow.camera.top = 4; key.shadow.camera.bottom = -4;
   key.shadow.radius = 6;
@@ -229,11 +231,32 @@ function build() {
   addEventListener('resize', resize);
   resize();
 
+  renderer.shadowMap.autoUpdate = false;
+  let frames = 0, slowSum = 0, sampleN = 0;
+
+  function adapt(dtMs) {
+    // after the first second, sample 45 frames and nudge resolution up or down
+    if (frames < 60) return;
+    slowSum += dtMs; sampleN++;
+    if (sampleN < 45) return;
+    const avg = slowSum / sampleN;
+    slowSum = 0; sampleN = 0;
+    let next = dpr;
+    if (avg > 24) next = Math.max(0.75, dpr - 0.25);
+    else if (avg < 14) next = Math.min(MAX_DPR, dpr + 0.25);
+    if (next !== dpr) { dpr = next; renderer.setPixelRatio(dpr); resize(); }
+  }
+
   function frame(now) {
     requestAnimationFrame(frame);
-    const dt = Math.min(0.05, (now - last) / 1000);
+    const dtMs = now - last;
+    const dt = Math.min(0.05, dtMs / 1000);
     last = now;
-    if (!visible) return;
+    if (!visible || document.hidden) return;
+    frames++;
+    adapt(dtMs);
+    // the shadow only needs refreshing every other frame
+    if (frames % 2 === 0) renderer.shadowMap.needsUpdate = true;
 
     state.p = lerp(state.p, story.p || 0, 0.12);
     state.px = lerp(state.px, pointerX, 0.05);
@@ -271,7 +294,7 @@ function build() {
     // push the object right of the headline by shifting the frustum, not the scene
     const w = canvas.clientWidth, h = canvas.clientHeight;
     if (wide) camera.setViewOffset(w, h, -w * 0.2, 0, w, h); else camera.setViewOffset(w, h, 0, h * 0.2, w, h);
-    canvas.style.opacity = String(1 - ss(0.95, 1, p));
+    canvas.style.opacity = p > 0.94 ? String(1 - ss(0.95, 1, p)) : '';
     root.rotation.x = state.py * 0.06;
 
     const dist = lerp(wide ? 10.2 : 17, wide ? 7 : 13, close) + explode * 0.9;
@@ -281,8 +304,16 @@ function build() {
 
     renderer.render(scene, camera);
   }
-  requestAnimationFrame(frame);
-  document.documentElement.classList.add('webgl-ready');
+  // compile every shader before the first frame so the page does not hitch on reveal
+  renderer.shadowMap.needsUpdate = true;
+  const start = () => {
+    requestAnimationFrame(t => {
+      last = t;
+      frame(t);
+      requestAnimationFrame(() => document.documentElement.classList.add('webgl-ready'));
+    });
+  };
+  (renderer.compileAsync ? renderer.compileAsync(scene, camera) : Promise.resolve()).then(start, start);
 }
 
 /* Procedural marble: parchment ground with soft stone veins. */

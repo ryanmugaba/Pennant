@@ -7,6 +7,9 @@ module.exports = async function handler(req, res) {
 
   if (req.method === 'GET') {
     const { rows } = await sql`SELECT * FROM products ORDER BY id`;
+    // Let Vercel's edge serve the catalogue for a minute: the photos are inlined,
+    // so this response is large and it was the slowest part of a first visit.
+    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=600');
     return res.status(200).json(rows);
   }
 

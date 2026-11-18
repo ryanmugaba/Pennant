@@ -217,7 +217,7 @@
     if (!list.length) { $('#grid').innerHTML = '<p class="empty">Nothing here yet. Ask us and we will source it.</p>'; return; }
     $('#grid').innerHTML = list.map(p => `
       <article class="product" data-id="${esc(p.id)}" tabindex="0" aria-label="${esc(p.name)}">
-        <div class="plinth"><img src="${esc(photo(p, 800))}" alt="${esc(p.name)}" loading="lazy" onerror="this.src='${FALLBACK}'"></div>
+        <div class="plinth"><img src="${esc(photo(p, 800))}" alt="${esc(p.name)}" loading="lazy" decoding="async" onerror="this.src='${FALLBACK}'"></div>
         <div class="p-body">
           <div class="p-cat">${esc(p.cat)}</div>
           <h3 class="p-name">${esc(p.name)}</h3>
@@ -538,8 +538,24 @@
     if ($('#view-checkout').classList.contains('live')) renderCheckout();
   }
 
+  const STATUS_LABEL = { received: 'Received', confirmed: 'Confirmed', out_for_delivery: 'Out for delivery', delivered: 'Delivered', cancelled: 'Cancelled' };
+  const STATUS_NOTE = {
+    confirmed: 'Stock and total are confirmed. We will be in touch about delivery.',
+    out_for_delivery: 'Your order is on its way.',
+    delivered: 'Delivered. Thank you for buying from Pennant.',
+    cancelled: 'This order was cancelled. Message us on WhatsApp if that is unexpected.'
+  };
   async function loadOrders() {
     try { myOrders = (await api('orders')).orders || []; } catch (e) { myOrders = []; }
+    // tell the customer when staff move one of their orders along
+    const seen = store.get('pennant-order-status', {});
+    const first = !Object.keys(seen).length;
+    myOrders.forEach(o => {
+      const st = o.status || 'received';
+      if (!first && seen[o.id] && seen[o.id] !== st && STATUS_NOTE[st]) notify(`Order #${o.id}: ${STATUS_LABEL[st]}`, STATUS_NOTE[st]);
+      seen[o.id] = st;
+    });
+    store.set('pennant-order-status', seen);
     if ($('#account').classList.contains('on')) renderAccount('signed');
   }
 
@@ -555,7 +571,7 @@
         <h3 style="font-size:17px;margin-bottom:10px">Your orders</h3>
         <div class="orders">${myOrders.length ? myOrders.map(o => `
           <div class="order"><b>#${o.id} · ${money(o.total)}</b>
-          <small>${new Date(o.created_at).toLocaleDateString([], { dateStyle: 'medium' })} · ${o.items.reduce((n, i) => n + i.qty, 0)} items · ${esc(o.status || 'received')}</small></div>`).join('')
+          <small>${new Date(o.created_at).toLocaleDateString([], { dateStyle: 'medium' })} · ${o.items.reduce((n, i) => n + i.qty, 0)} items · ${esc(STATUS_LABEL[o.status] || 'Received')}</small></div>`).join('')
           : '<p class="muted" style="font-size:15px">No orders yet.</p>'}</div>
         <label class="switch">Order alerts on this device<input type="checkbox" id="alertSwitch" ${alertsOn ? 'checked' : ''}></label>
         <button class="btn btn-ghost btn-block" id="signOut" style="margin-top:12px">Sign out</button>`;
@@ -661,4 +677,7 @@
   })();
 
   api('me').then(d => { config.googleClientId = d.googleClientId || null; setUser(d.user || null); if (d.user) loadOrders(); }).catch(() => {});
+  // check for order updates while the page is open
+  setInterval(() => { if (user && !document.hidden) loadOrders(); }, 120000);
+  addEventListener('focus', () => { if (user) loadOrders(); });
 })();

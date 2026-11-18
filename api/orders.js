@@ -1,6 +1,7 @@
 const { sql, ensureSchema } = require('../lib/db');
 const { requireAdmin, currentUserId } = require('../lib/auth');
 
+const STATUSES = ['received', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled'];
 const clip = (v, n) => String(v == null ? '' : v).trim().slice(0, n);
 
 module.exports = async function handler(req, res) {
@@ -45,6 +46,16 @@ module.exports = async function handler(req, res) {
     return res.status(200).json(rows);
   }
 
-  res.setHeader('Allow', 'GET, POST');
+  if (req.method === 'PATCH') {
+    if (!requireAdmin(req, res)) return;
+    const id = Number(req.body && req.body.id);
+    const status = String((req.body && req.body.status) || '');
+    if (!Number.isInteger(id) || !STATUSES.includes(status)) return res.status(400).json({ error: 'Bad order or status' });
+    const { rows } = await sql`UPDATE orders SET status = ${status} WHERE id = ${id} RETURNING id, status`;
+    if (!rows.length) return res.status(404).json({ error: 'No such order' });
+    return res.status(200).json(rows[0]);
+  }
+
+  res.setHeader('Allow', 'GET, POST, PATCH');
   res.status(405).json({ error: 'Method not allowed' });
 };
